@@ -55,7 +55,7 @@ Useful for evaluating Julia code in a region within a given module."
       (backward-paragraph)
       (julia--eval-region (point) end))))
 
-(defun julia-eval-dwim ()
+(defun julia-eval-dwim (&optional line-p)
   "Evaluate the region when active, otherwise the paragraph that contains the point."
   (interactive)
   (if (and transient-mark-mode mark-active
@@ -63,11 +63,17 @@ Useful for evaluating Julia code in a region within a given module."
       (let ((end (region-end)))
         (julia--eval-region (region-beginning) end)
         (goto-char end))
-    (julia-eval-paragraph)))
+    (if line-p
+        (progn
+          (julia-eval-line)
+          (ess-next-code-line 1))
+      (julia-eval-paragraph))))
 
 (defun customize-julia-extensions ()
   "Establish bindings for experimenting with REPL interaction from a Julia code buffer."
   (interactive)
+  (local-set-key (kbd "<C-return>") (lambda () (interactive)
+                                      (julia-eval-dwim t)))
   (local-set-key (kbd "C-c <C-return>") 'julia-eval-line)
   (local-set-key (kbd "C-c C-r") 'julia-eval-region)
   (local-set-key (kbd "C-c C-c") 'julia-eval-dwim))
