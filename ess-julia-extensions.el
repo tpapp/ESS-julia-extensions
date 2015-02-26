@@ -26,16 +26,17 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
 
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
-  (let ((line (line-number-at-pos start))
-        (modpath (julia-active-module-path start)) ; FIXME see note for function
-        (file buffer-file-truename))
-    (ess-send-string process (format "ESSx.eval_string(\"%s\", %d, \"%s\"%s)"
-                                     (buffer-substring-no-properties start end)
-                                     line file
-                                     (if modpath
-                                         (concat ", "
-                                                 (julia-module-path-string modpath))
-                                       "")))))
+  (let* ((line (line-number-at-pos start))
+         (modpath (julia-active-module-path start)) ; FIXME see note for function
+         (file buffer-file-truename)
+         (modpath-string (if modpath
+                             (concat ", "
+                                     (julia-module-path-string modpath))
+                           ""))
+         (string (format "ESSx.eval_string(%S, %d, %S%s)"
+                         (buffer-substring-no-properties start end)
+                         line file modpath-string)))
+    (ess-send-string process string)))
 
 ;;; code below this line is for experimentating with these extensions,
 ;;; and not meant to be integrated into ESS
