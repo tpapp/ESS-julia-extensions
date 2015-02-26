@@ -1,4 +1,6 @@
-This is an experiment to improve the integration of [[https://github.com/emacs-ess/ESS][ESS]] and [[https://github.com/JuliaLang/julia/][Julia]], especially the interaction with the Julia REPL. I hope that once ESS is updated to depend on [[https://github.com/emacs-ess/ESS/pull/122][julia-mode]], code here will be integrated into ESS.
+This is an experiment to improve the integration of [[https://github.com/emacs-ess/ESS][ESS]] and [[https://github.com/JuliaLang/julia/][Julia]], especially the interaction with the Julia REPL. 
+
+For now, the code is kept separate from ESS, and can be installed along with the latest version of ESS. I hope that once ESS is updated to depend on [[https://github.com/emacs-ess/ESS/pull/122][julia-mode]], this repository will be integrated into ESS; then it will be deleted.
 
 * Usage
 
@@ -13,6 +15,6 @@ and load the Emacs Lisp code, eg
 #+END_SRC
 with the paths, of course, depending on where you cloned this repo.
 
-It will take over the =C-c C-RET=, =C-c C-r=, and =C-c C-c= keybindings in Julia buffers.
+It will take over the =C-RET=, =C-c C-r=, and =C-c C-c= keybindings in Julia buffers.
 
-All the code is experimental, improvements, suggestions and pull requests are welcome.
+All the code is experimental: improvements, suggestions and pull requests are welcome.
