@@ -1,29 +1,40 @@
-(defun julia-preceding-module-name (start end)
-  "If there is a Julia module defined between START and END,
-return NIL, otherwise return the module name (if any) searching
-backwards from START.
+(require 'cl-lib)
+
+(defun julia-active-module-path (position)
+  "Return a list of strings that designates the path of the active module at POSITION. For example, '(\"Foo\" \"Bar\") would be returned when Foo.Bar.
 
 Useful for evaluating Julia code in a region within a given module."
   ;; FIXME this is a quick fix, and does not handle sub/nested modules.
   ;; A proper solution would be parsing the module structure, wait until
   ;; julia-mode is merged into ESS.
-  (interactive "r")
   (let* ((module-regexp "module\s-*\\(\\sw*\\)"))
     (save-excursion
-      (goto-char start)
+      (goto-char position)
       (when (search-backward-regexp module-regexp nil t)
-        (match-string-no-properties 1)))))
+        (list (match-string-no-properties 1))))))
+
+(defun julia-module-path-string (module-path)
+  "Convert a module path to a string that can be parsed by the Julia process.
+
+For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
+  (format "[%s]"
+          (cl-reduce (lambda (x y)
+                       (format "%s, %s" x y))
+                     module-path
+                     :key (lambda (m)
+                            (format ":%s" m)))))
 
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
   (let ((line (line-number-at-pos start))
-        (module (julia-preceding-module-name start end)) ; FIXME see note for function
+        (modpath (julia-active-module-path start)) ; FIXME see note for function
         (file buffer-file-truename))
     (ess-send-string process (format "ESSx.eval_string(\"%s\", %d, \"%s\"%s)"
                                      (buffer-substring-no-properties start end)
                                      line file
-                                     (if module
-                                         (format ", [:%s]" module)
+                                     (if modpath
+                                         (concat ", "
+                                                 (julia-module-path-string modpath))
                                        "")))))
 
 ;;; code below this line is for experimentating with these extensions,
