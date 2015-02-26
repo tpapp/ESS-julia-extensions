@@ -2,6 +2,14 @@ This is an experiment to improve the integration of [[https://github.com/emacs-e
 
 For now, the code is kept separate from ESS, and can be installed along with the latest version of ESS. I hope that once ESS is updated to depend on [[https://github.com/emacs-ess/ESS/pull/122][julia-mode]], this repository will be integrated into ESS; then it will be deleted.
 
+* Where it improves on ESS
+
+** Evaluating code from the source buffer into the REPL will
+
+1. keep track of files and line numbers, leading to more meaningful error messages,
+
+2. if the code is within a module, it will be evaluated in that module, allowing incremental development of modules, similarly to [[http://junolab.org/][Juno]].
+
 * Usage
 
 For now, you will need to include the following line in `.juliarc.jl`:
@@ -18,3 +26,7 @@ with the paths, of course, depending on where you cloned this repo.
 It will take over the =C-RET=, =C-c C-r=, and =C-c C-c= keybindings in Julia buffers.
 
 All the code is experimental: improvements, suggestions and pull requests are welcome.
+
+* Acknowledgments
+
+Vitalie Spinu, Wilfred Hughes, and Mike Innes kindly helped me out with questions about ESS and Julia.
