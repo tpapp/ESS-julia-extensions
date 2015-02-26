@@ -4,7 +4,7 @@ For now, the code is kept separate from ESS, and can be installed along with the
 
 * Where it improves on ESS
 
-** Evaluating code from the source buffer into the REPL will
+Evaluating code from the source buffer into the REPL will
 
 1. keep track of files and line numbers, leading to more meaningful error messages,
 
