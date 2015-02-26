@@ -12,7 +12,7 @@ Evaluating code from the source buffer into the REPL will
 
 * Usage
 
-For now, you will need to include the following line in `.juliarc.jl`:
+For now, you will need to include the following line in =.juliarc.jl=:
 
 #+BEGIN_SRC julia
   include("path-to/ESS-julia-extensions/ess-julia-extensions.jl")
