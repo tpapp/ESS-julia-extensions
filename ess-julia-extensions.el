@@ -11,10 +11,8 @@ Useful for evaluating Julia code in a region within a given module."
   (let* ((module-regexp "module\s-*\\(\\sw*\\)"))
     (save-excursion
       (goto-char start)
-      (unless (search-forward-regexp module-regexp end t)
-        (goto-char start)
-        (when (search-backward-regexp module-regexp nil t)
-          (match-string-no-properties 1))))))
+      (when (search-backward-regexp module-regexp nil t)
+        (match-string-no-properties 1)))))
 
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
