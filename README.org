@@ -1,0 +1,18 @@
+This is an experiment to improve the integration of [[https://github.com/emacs-ess/ESS][ESS]] and [[https://github.com/JuliaLang/julia/][Julia]], especially the interaction with the Julia REPL. I hope that once ESS is updated to depend on [[https://github.com/emacs-ess/ESS/pull/122][julia-mode]], code here will be integrated into ESS.
+
+* Usage
+
+For now, you will need to include the following line in `.juliarc.jl`:
+
+#+BEGIN_SRC julia
+  include("path-to/ESS-julia-extensions/ess-julia-extensions.jl")
+#+END_SRC
+and load the Emacs Lisp code, eg
+#+BEGIN_SRC emacs-lisp
+  (load "path-to/ESS-julia-extensions/ess-julia-extensions.el")
+#+END_SRC
+with the paths, of course, depending on where you cloned this repo.
+
+It will take over the =C-c C-RET=, =C-c C-r=, and =C-c C-c= keybindings in Julia buffers.
+
+All the code is experimental, improvements, suggestions and pull requests are welcome.
