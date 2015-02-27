@@ -38,20 +38,25 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
                          line file modpath-string)))
     (ess-send-string process string)))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; code below this line is for experimentating with these extensions,
 ;;; and not meant to be integrated into ESS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defun julia--eval-region (start end)
-  "Evaluate a region in the current process."
+  "Evaluate a region in the current process. Ensures that there is a process and takes care of aesthetics (blinking, etc). "
   ;; FIXME is this the right way to ensure process is running?
   (ess-force-buffer-current)
+  (ess-blink-region start end)
   (julia-send-region (ess-get-process ess-current-process-name) start end))
 
 (defun julia-eval-region (start end)
   "Evaluate the active region."
   ;; FIXME should this test for MARK-ACTIVE?
   (interactive "r")
-  (julia--eval-region start end))
+  (julia--eval-region start end)
+  (if (and (fboundp 'deactivate-mark) ess-eval-deactivate-mark)
+      (deactivate-mark)))
 
 (defun julia-eval-line ()
   "Evaluate the current line of code."
