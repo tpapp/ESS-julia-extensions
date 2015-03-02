@@ -7,7 +7,7 @@ VERSION < v"0.4-" && using Docile
 export eval_string, ensure_module
 
 @doc doc"""Evaluate `string` as if it was in `filename`, starting at line number `line`. When a `mod` is supplied, evaluation happens in that module.
-""" ->
+"""->
 function eval_string(string::AbstractString, line::Int, filename::AbstractString,
                      mod::Module=current_module())
   eval(mod, :(include_string("\n"^($line-1)*$string, $filename)))

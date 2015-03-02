@@ -1,5 +1,14 @@
 (require 'cl-lib)
 
+(eval-and-compile
+ (defvar ess-julia-extensions-directory
+   (directory-file-name
+    (file-name-directory
+     (if (and (boundp 'load-file-name) load-file-name) ;; A nice default
+         (file-truename load-file-name)
+       (error "could not establish directory for ESS-julia-extensions"))))
+   "Directory of this file. Necessary for loading the ESSx module."))
+
 (defun julia-active-module-path (position)
   "Return a list of strings that designates the path of the active module at POSITION. For example, '(\"Foo\" \"Bar\") would be returned when Foo.Bar.
 
@@ -24,6 +33,13 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
                      :key (lambda (m)
                             (format ":%s" m)))))
 
+(defun julia-ensure-module (process module file)
+  "Ensures that MODULE is defined in PROCESS, loading FILE if necessary.
+
+NOTE: This is necessary until workspace() in Julia is fixed to
+reload the REPL interaction interface."
+  (ess-send-string process (format "isdefined(:%s) || include(%S)" module file)))
+
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
   (let* ((line (line-number-at-pos start))
@@ -36,6 +52,11 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
          (string (format "ESSx.eval_string(%S, %d, %S%s)"
                          (buffer-substring-no-properties start end)
                          line file modpath-string)))
+    (julia-ensure-module process "ESS"
+                         (format "%sess-julia.jl" ess-etc-directory))
+    (julia-ensure-module process "ESSx"
+                         (format "%s/ess-julia-extensions.jl"
+                                 ess-julia-extensions-directory))
     (ess-send-string process string)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -12,16 +12,11 @@ Evaluating code from the source buffer into the REPL will
 
 * Usage
 
-For now, you will need to include the following line in =.juliarc.jl=:
-
-#+BEGIN_SRC julia
-  include("path-to/ESS-julia-extensions/ess-julia-extensions.jl")
-#+END_SRC
-and load the Emacs Lisp code, eg
+Load the Emacs Lisp code, eg
 #+BEGIN_SRC emacs-lisp
   (load "path-to/ESS-julia-extensions/ess-julia-extensions.el")
 #+END_SRC
-with the paths, of course, depending on where you cloned this repo.
+with the path, of course, depending on where you cloned this repo.
 
 It will take over the =C-RET=, =C-c C-r=, and =C-c C-c= keybindings in Julia buffers.
 
