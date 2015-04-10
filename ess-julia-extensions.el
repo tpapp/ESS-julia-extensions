@@ -79,6 +79,11 @@ reload the REPL interaction interface."
   (if (and (fboundp 'deactivate-mark) ess-eval-deactivate-mark)
       (deactivate-mark)))
 
+(defun julia-eval-buffer ()
+  "Send the current buffer to the inferior Julia process."
+  (interactive)
+  (julia--eval-region (point-min) (point-max)))
+
 (defun julia-eval-line ()
   "Evaluate the current line of code."
   (interactive)
@@ -114,6 +119,7 @@ reload the REPL interaction interface."
                                       (julia-eval-dwim t)))
   (local-set-key (kbd "C-c <C-return>") 'julia-eval-line)
   (local-set-key (kbd "C-c C-r") 'julia-eval-region)
-  (local-set-key (kbd "C-c C-c") 'julia-eval-dwim))
+  (local-set-key (kbd "C-c C-c") 'julia-eval-dwim)
+  (local-set-key (kbd "C-c C-b") 'julia-eval-buffer))
 
 (add-hook 'julia-mode-hook 'customize-julia-extensions)
