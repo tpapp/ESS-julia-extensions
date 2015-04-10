@@ -49,9 +49,9 @@ reload the REPL interaction interface."
                              (concat ", "
                                      (julia-module-path-string modpath))
                            ""))
+         (code (buffer-substring-no-properties start end))
          (string (format "ESSx.eval_string(%S, %d, %S%s)"
-                         (buffer-substring-no-properties start end)
-                         line file modpath-string)))
+                         code line file modpath-string)))
     (julia-ensure-module process "ESS"
                          (format "%sess-julia.jl" ess-etc-directory))
     (julia-ensure-module process "ESSx"
