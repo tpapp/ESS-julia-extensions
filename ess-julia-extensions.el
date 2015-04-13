@@ -40,6 +40,21 @@ NOTE: This is necessary until workspace() in Julia is fixed to
 reload the REPL interaction interface."
   (ess-send-string process (format "isdefined(:%s) || include(%S)" module file)))
 
+(defun julia-escape-string (string)
+  "Escape characters in a string so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
+
+The following are escaped: double quotes, $ (interpolation)."
+  (with-output-to-string
+    (princ "\"")
+    (mapc (lambda (c)
+            (princ
+             (case c
+               (?$ "\\$")
+               (?\" "\\\"")
+               (otherwise (string c)))))
+          string)
+    (princ "\"")))
+
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
   (let* ((line (line-number-at-pos start))
@@ -50,8 +65,8 @@ reload the REPL interaction interface."
                                      (julia-module-path-string modpath))
                            ""))
          (code (buffer-substring-no-properties start end))
-         (string (format "ESSx.eval_string(%S, %d, %S%s)"
-                         code line file modpath-string)))
+         (string (format "ESSx.eval_string(%s, %d, %S%s)"
+                         (julia-escape-string code) line file modpath-string)))
     (julia-ensure-module process "ESS"
                          (format "%sess-julia.jl" ess-etc-directory))
     (julia-ensure-module process "ESSx"
