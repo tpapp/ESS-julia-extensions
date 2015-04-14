@@ -31,7 +31,7 @@ function ensure_module(modpath::Array{Symbol,1})
   parent
 end
 
-@doc """Same as `eval_string`, but ensures the that the module exists.""" ->
+@doc """Same as `eval_string` above, but ensures the that the module exists.""" ->
 function eval_string(string::AbstractString, line::Int, filename::AbstractString,
                      modpath::Array{Symbol,1})
   eval_string(string, line, filename, ensure_module(modpath))
