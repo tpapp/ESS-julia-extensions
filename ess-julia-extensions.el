@@ -33,12 +33,11 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
                      :key (lambda (m)
                             (format ":%s" m)))))
 
-(defun julia-ensure-module (process module file)
-  "Ensures that MODULE is defined in PROCESS, loading FILE if necessary.
+(defun julia-ensure-module-evalstring (module file)
+  "Return a string that, when evaluated in Julia, ensures that MODULE is defined in PROCESS, loading FILE if necessary.
 
-NOTE: This is necessary until workspace() in Julia is fixed to
-reload the REPL interaction interface."
-  (ess-send-string process (format "isdefined(:%s) || include(%S)" module file)))
+NOTE: This is necessary until workspace() in Julia is fixed to reload the REPL interaction interface."
+  (format "isdefined(:%s) || include(%S)" module file))
 
 (defun julia-escape-string (string)
   "Escape characters in a STRING so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
@@ -66,13 +65,16 @@ The following are escaped: double quotes, $ (interpolation)."
                            ""))
          (srccode (buffer-substring-no-properties start end))
          (evalstring (format "ESSx.eval_string(%s, %d, %S%s)"
-                         (julia-escape-string srccode) line file modpath-string)))
-    (julia-ensure-module process "ESS"
-                         (format "%sess-julia.jl" ess-etc-directory))
-    (julia-ensure-module process "ESSx"
-                         (format "%s/ess-julia-extensions.jl"
-                                 ess-julia-extensions-directory))
-    (ess-send-string process evalstring)))
+                             (julia-escape-string srccode) line file modpath-string))
+         (ensure-module-ESS (julia-ensure-module-evalstring
+                             "ESS" (format "%sess-julia.jl" ess-etc-directory)))
+         (ensure-module-ESSx (julia-ensure-module-evalstring
+                              "ESSx" (format "%s/ess-julia-extensions.jl"
+                                             ess-julia-extensions-directory))))
+    (ess-send-string process (format "(%s;%s;%s)"
+                                     ensure-module-ESS
+                                     ensure-module-ESSx
+                                     evalstring))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; code below this line is for experimentating with these extensions,
