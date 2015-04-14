@@ -41,7 +41,7 @@ reload the REPL interaction interface."
   (ess-send-string process (format "isdefined(:%s) || include(%S)" module file)))
 
 (defun julia-escape-string (string)
-  "Escape characters in a string so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
+  "Escape characters in a STRING so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
 
 The following are escaped: double quotes, $ (interpolation)."
   (with-output-to-string
@@ -64,15 +64,15 @@ The following are escaped: double quotes, $ (interpolation)."
                              (concat ", "
                                      (julia-module-path-string modpath))
                            ""))
-         (code (buffer-substring-no-properties start end))
-         (string (format "ESSx.eval_string(%s, %d, %S%s)"
-                         (julia-escape-string code) line file modpath-string)))
+         (srccode (buffer-substring-no-properties start end))
+         (evalstring (format "ESSx.eval_string(%s, %d, %S%s)"
+                         (julia-escape-string srccode) line file modpath-string)))
     (julia-ensure-module process "ESS"
                          (format "%sess-julia.jl" ess-etc-directory))
     (julia-ensure-module process "ESSx"
                          (format "%s/ess-julia-extensions.jl"
                                  ess-julia-extensions-directory))
-    (ess-send-string process string)))
+    (ess-send-string process evalstring)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; code below this line is for experimentating with these extensions,
