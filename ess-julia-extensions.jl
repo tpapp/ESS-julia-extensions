@@ -10,7 +10,8 @@ export eval_string, ensure_module
 """->
 function eval_string(string::AbstractString, line::Int, filename::AbstractString,
                      mod::Module=current_module())
-  eval(mod, :(include_string("\n"^($line-1)*$string, $filename)))
+  evalstring = "\n"^(line-1)*string
+  eval(mod, :(include_string($evalstring, $filename)))
 end
 
 @doc """Ensure that a given module, specified as a vector of symbols, exists; by defining it as necessary. Used by ESS when a module containing the evaluated code can be found.
