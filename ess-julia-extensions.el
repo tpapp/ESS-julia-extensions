@@ -9,7 +9,7 @@
        (error "could not establish directory for ESS-julia-extensions"))))
    "Directory of this file. Necessary for loading the ESSx module."))
 
-(defun julia-active-module (position)
+(defun julia--active-module (position)
   "Return a plist with the following keys:
 
 :module-path
@@ -38,7 +38,7 @@ Useful for evaluating Julia code in a region within a given module."
               :contents-start (point-min)
               :contents-end (point-max))))))
 
-(defun julia-module-path-string (module-path)
+(defun julia--module-path-string (module-path)
   "Convert a module path to a string that can be parsed by the Julia process.
 
 For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
@@ -49,13 +49,13 @@ For example, '(\"Foo\" \"Bar\") => \"[:Foo :Bar]\""
                      :key (lambda (m)
                             (format ":%s" m)))))
 
-(defun julia-ensure-module-evalstring (module file)
+(defun julia--ensure-module-evalstring (module file)
   "Return a string that, when evaluated in Julia, ensures that MODULE is defined in PROCESS, loading FILE if necessary.
 
 NOTE: This is necessary until workspace() in Julia is fixed to reload the REPL interaction interface."
   (format "isdefined(:%s) || include(%S)" module file))
 
-(defun julia-escape-string (string)
+(defun julia--escape-string (string)
   "Escape characters in a STRING so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
 
 The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)."
@@ -67,21 +67,21 @@ The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)
           string)
     (princ "\"")))
 
-(defun julia-send-region (process start end)
+(defun julia--send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
   (let* ((line (line-number-at-pos start))
-         (modpath (plist-get (julia-active-module start) :module-path)) ; FIXME see note for function
+         (modpath (plist-get (julia--active-module start) :module-path)) ; FIXME see note for function
          (file buffer-file-truename)
          (modpath-string (if modpath
                              (concat ", "
-                                     (julia-module-path-string modpath))
+                                     (julia--module-path-string modpath))
                            ""))
          (srccode (buffer-substring-no-properties start end))
          (evalstring (format "ESSx.eval_string(%s, %d, %S%s)"
-                             (julia-escape-string srccode) line file modpath-string))
-         (ensure-module-ESS (julia-ensure-module-evalstring
+                             (julia--escape-string srccode) line file modpath-string))
+         (ensure-module-ESS (julia--ensure-module-evalstring
                              "ESS" (format "%sess-julia.jl" ess-etc-directory)))
-         (ensure-module-ESSx (julia-ensure-module-evalstring
+         (ensure-module-ESSx (julia--ensure-module-evalstring
                               "ESSx" (format "%s/ess-julia-extensions.jl"
                                              ess-julia-extensions-directory))))
     (ess-send-string process (format "(%s;%s;%s)"
@@ -99,7 +99,7 @@ The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)
   ;; FIXME is this the right way to ensure process is running?
   (ess-force-buffer-current)
   (ess-blink-region start end)
-  (julia-send-region (ess-get-process ess-current-process-name) start end))
+  (julia--send-region (ess-get-process ess-current-process-name) start end))
 
 (defun julia-eval-region (start end)
   "Evaluate the active region."
@@ -118,7 +118,7 @@ The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)
   "Evaluate the whole module around the current line."
   (interactive)
   ;; finds module info 2x, inefficient
-  (let ((active-module (julia-active-module (point))))
+  (let ((active-module (julia--active-module (point))))
     (message "%s" active-module)
     (julia--eval-region (plist-get active-module :contents-start)
                         (plist-get active-module :contents-end))))
