@@ -62,12 +62,8 @@ The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)
   (with-output-to-string
     (princ "\"")
     (mapc (lambda (c)
-            (princ
-             (case c
-               (?$ "\\$")
-               (?\\ "\\\\")
-               (?\" "\\\"")
-               (otherwise (string c)))))
+            (case c ((?$ ?\\ ?\") (write-char ?\\)))
+            (write-char c))
           string)
     (princ "\"")))
 
