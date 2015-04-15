@@ -58,13 +58,14 @@ NOTE: This is necessary until workspace() in Julia is fixed to reload the REPL i
 (defun julia-escape-string (string)
   "Escape characters in a STRING so that it can be passed to `Base.include_string` in Julia. Also wraps string in double quotes.
 
-The following are escaped: double quotes, $ (interpolation)."
+The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)."
   (with-output-to-string
     (princ "\"")
     (mapc (lambda (c)
             (princ
              (case c
                (?$ "\\$")
+               (?\\ "\\\\")
                (?\" "\\\"")
                (otherwise (string c)))))
           string)
