@@ -9,8 +9,17 @@
        (error "could not establish directory for ESS-julia-extensions"))))
    "Directory of this file. Necessary for loading the ESSx module."))
 
-(defun julia-active-module-path (position)
-  "Return a list of strings that designates the path of the active module at POSITION. For example, '(\"Foo\" \"Bar\") would be returned when Foo.Bar.
+(defun julia-active-module (position)
+  "Return a plist with the following keys:
+
+:module-path
+  a list of strings that designates the path of the active module at POSITION. For example, '(\"Foo\" \"Bar\") would be returned when Foo.Bar.
+
+:contents-start
+  the position at which module contents start
+
+:contents-end
+  the position at which module contents end
 
 Useful for evaluating Julia code in a region within a given module."
   ;; FIXME this is a quick fix, and does not handle sub/nested modules.
@@ -19,8 +28,15 @@ Useful for evaluating Julia code in a region within a given module."
   (let* ((module-regexp "module\s-*\\(\\sw*\\)"))
     (save-excursion
       (goto-char position)
-      (when (search-backward-regexp module-regexp nil t)
-        (list (match-string-no-properties 1))))))
+      (if (search-backward-regexp module-regexp nil t)
+          (list :module-path (list (match-string-no-properties 1))
+                :contents-start (match-end 1)
+                :contents-end (if (search-forward-regexp "\\(end\\)\\(\s-\\|\n\\)*\\'")
+                                  (match-beginning 1)
+                                (point-max)))
+        (list :module-path nil
+              :contents-start (point-min)
+              :contents-end (point-max))))))
 
 (defun julia-module-path-string (module-path)
   "Convert a module path to a string that can be parsed by the Julia process.
@@ -57,7 +73,7 @@ The following are escaped: double quotes, $ (interpolation)."
 (defun julia-send-region (process start end)
   "Send the region between START and END to a Julia process. Evaluated in the current module when applicable, uses the correct line numbers."
   (let* ((line (line-number-at-pos start))
-         (modpath (julia-active-module-path start)) ; FIXME see note for function
+         (modpath (plist-get (julia-active-module start) :module-path)) ; FIXME see note for function
          (file buffer-file-truename)
          (modpath-string (if modpath
                              (concat ", "
@@ -101,6 +117,15 @@ The following are escaped: double quotes, $ (interpolation)."
   (interactive)
   (julia--eval-region (point-min) (point-max)))
 
+(defun julia-eval-module-contents ()
+  "Evaluate the whole module around the current line."
+  (interactive)
+  ;; finds module info 2x, inefficient
+  (let ((active-module (julia-active-module (point))))
+    (message "%s" active-module)
+    (julia--eval-region (plist-get active-module :contents-start)
+                        (plist-get active-module :contents-end))))
+
 (defun julia-eval-line ()
   "Evaluate the current line of code."
   (interactive)
@@ -137,6 +162,7 @@ The following are escaped: double quotes, $ (interpolation)."
   (local-set-key (kbd "C-c <C-return>") 'julia-eval-line)
   (local-set-key (kbd "C-c C-r") 'julia-eval-region)
   (local-set-key (kbd "C-c C-c") 'julia-eval-dwim)
-  (local-set-key (kbd "C-c C-b") 'julia-eval-buffer))
+  (local-set-key (kbd "C-c C-b") 'julia-eval-buffer)
+  (local-set-key (kbd "C-c C-m") 'julia-eval-module-contents))
 
 (add-hook 'julia-mode-hook 'customize-julia-extensions)
