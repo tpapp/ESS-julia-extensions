@@ -119,7 +119,6 @@ The following are escaped: double quotes (\"), backslash (\\), $ (interpolation)
   (interactive)
   ;; finds module info 2x, inefficient
   (let ((active-module (julia--active-module (point))))
-    (message "%s" active-module)
     (julia--eval-region (plist-get active-module :contents-start)
                         (plist-get active-module :contents-end))))
 
